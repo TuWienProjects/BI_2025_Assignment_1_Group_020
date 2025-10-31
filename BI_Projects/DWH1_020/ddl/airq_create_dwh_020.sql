@@ -1,5 +1,5 @@
--- Make A1 dwh_xxx schema the default for this session
-SET search_path TO dwh_xxx;
+-- Make A1 dwh_020 schema the default for this session
+SET search_path TO dwh_020;
 
 -- -------------------------------
 -- 2) DROP TABLE before attempting to create DWH schema tables

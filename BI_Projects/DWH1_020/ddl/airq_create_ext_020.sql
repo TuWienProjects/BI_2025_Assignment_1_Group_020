@@ -1,7 +1,7 @@
 -- please remember to give a meaningful name to both Table X (instead of tb_x) and TableY (instead of tb_y)
 
--- Make the A1's stg_xxx schema the default for this session
-SET search_path TO stg_xxx;
+-- Make the A1's stg_020 schema the default for this session
+SET search_path TO stg_020;
 
 -- -------------------------------
 -- 2) DROP TABLE before attempting to create OLTP snapshot tables
