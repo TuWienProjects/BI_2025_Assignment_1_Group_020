@@ -1,30 +1,57 @@
--- Make A1 dwh_020, stg_020 schemas the default for this session
 SET search_path TO dwh_020, stg_020;
 
--- =======================================
--- Load ft_name1 (seed, FK-safe)
--- =======================================
+-- ============================================================
+-- ETL Step: Load ft_reading fact table
+-- ============================================================
 
--- 1) Truncate target
-TRUNCATE TABLE ft_name1 RESTART IDENTITY CASCADE;
+TRUNCATE TABLE ft_reading RESTART IDENTITY CASCADE;
 
--- 2) Insert a small, valid seed set
-WITH seeds AS (
+WITH readings AS (
   SELECT
-      dtd.id                     AS day_id
-    , dp.sk_parameter            AS sk_parameter
-    , ds.sk_servicetype          AS sk_servicetype
-    , ROW_NUMBER() OVER ()       AS rn
-  FROM (SELECT id FROM dim_timeday ORDER BY id LIMIT 3)          dtd
-  CROSS JOIN (SELECT sk_parameter FROM dim_parameter ORDER BY 1 LIMIT 2) dp
-  CROSS JOIN (SELECT sk_servicetype FROM dim_servicetype ORDER BY 1 LIMIT 2) ds
+      re.id AS reading_id,
+      re.sensordevid AS device_id,
+      re.paramid,
+      re.readingmodeid,
+      re.readat AS reading_date,
+      re.recordedvalue AS recorded_value,
+      re.datavolumekb / 1024.0 AS data_volume_mb,  -- convert KB to MB
+      re.dataquality AS data_quality_score,
+      CASE 
+          WHEN pa.threshold IS NOT NULL AND re.recordedvalue > pa.threshold 
+          THEN TRUE 
+          ELSE FALSE 
+      END AS exceedance_flag
+  FROM tb_readingevent re
+  LEFT JOIN tb_paramalert pa 
+         ON pa.paramid = re.paramid
 )
-INSERT INTO ft_name1 (id, day_id, sk_parameter, sk_servicetype)
-SELECT rn, day_id, sk_parameter, sk_servicetype
-FROM seeds
-ORDER BY rn
-LIMIT 5;
 
--- 3) Refresh stats (optional but recommended)
-ANALYZE ft_name1;
-
+INSERT INTO ft_reading (
+    day_id,
+    sk_device_geo,
+    sk_parameter,
+    sk_readingmode,
+    recorded_value,
+    data_volume_mb,
+    data_quality_score,
+    exceedance_flag,
+    etl_load_timestamp
+)
+SELECT
+  TO_CHAR(r.reading_date, 'YYYYMMDD')::INT AS day_id,
+  dd.sk_device_geo,
+  dp.sk_parameter,
+  drm.sk_readingmode,
+  r.recorded_value,
+  r.data_volume_mb,
+  r.data_quality_score,
+  r.exceedance_flag,
+  CURRENT_TIMESTAMP
+FROM readings r
+JOIN dim_device_geo dd 
+     ON dd.device_id = r.device_id
+JOIN dim_parameter dp 
+     ON dp.tb_param_id = r.paramid
+JOIN dim_readingmode drm 
+     ON drm.mode_code = r.readingmodeid::text   
+ORDER BY day_id;

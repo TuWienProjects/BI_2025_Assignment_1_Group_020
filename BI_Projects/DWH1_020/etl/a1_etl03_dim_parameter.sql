@@ -1,19 +1,25 @@
--- Make A1 dwh_020, stg_020 schemas the default for this session
 SET search_path TO dwh_020, stg_020;
 
 -- =======================================
--- Load [table name]
+-- Load dim_parameter
 -- =======================================
 
--- Step 1: Truncate target table
 TRUNCATE TABLE dim_parameter RESTART IDENTITY CASCADE;
 
-INSERT INTO dim_parameter (tb_param_id, paramname, category, unit)
-SELECT DISTINCT p.id, p.paramname, p.category, p.unit
+INSERT INTO dim_parameter (
+    tb_param_id,
+    paramname,
+    parameter_group,
+    parameter_family,
+    unit,
+    etl_load_timestamp
+)
+SELECT DISTINCT
+    p.id,
+    p.paramname,
+    p.category,   -- maps to parameter_group
+    p.purpose,    -- maps to parameter_family
+    p.unit,
+    CURRENT_TIMESTAMP
 FROM tb_param p
 ORDER BY p.id;
-
-
-
-
-

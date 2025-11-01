@@ -1,35 +1,67 @@
--- Make A1 dwh_020, stg_020 schemas the default for this session
 SET search_path TO dwh_020, stg_020;
 
--- =======================================
--- Load ft_name2 (seed, FK-safe)
--- =======================================
+-- ============================================================
+-- ETL Step: Load ft_service fact table
+-- ============================================================
 
--- 1) Truncate target
-TRUNCATE TABLE ft_name2 RESTART IDENTITY CASCADE;
+TRUNCATE TABLE ft_service RESTART IDENTITY CASCADE;
 
--- 2) Insert a small, valid seed set
-WITH seeds AS (
+WITH svc AS (
   SELECT
-      dtd.id                       AS day_id
-    , dp.sk_parameter              AS sk_parameter
-    , tr.sk_technician_role        AS sk_technician_role
-    , ROW_NUMBER() OVER ()         AS rn
-  FROM (SELECT id FROM dim_timeday ORDER BY id LIMIT 3)              dtd
-  CROSS JOIN (SELECT sk_parameter FROM dim_parameter ORDER BY 1 LIMIT 2) dp
-  CROSS JOIN (SELECT sk_technician_role
-              FROM dim_technician_role_scd2
-              WHERE is_current = TRUE
-              ORDER BY 1 LIMIT 2) tr
+      s.id AS service_id,
+      s.sensordevid AS device_id,
+      s.servicedat AS service_date,
+      s.servicetypeid,
+      s.employeeid,
+      s.servicecost AS service_cost_eur,
+      s.durationminutes AS duration_minutes,
+      s.servicequality AS service_quality_score
+  FROM tb_serviceevent s
+),
+
+role_lookup AS (
+  SELECT
+      dtr.sk_technician_role,
+      dtr.employee_id,
+      dtr.role_level,
+      td.date
+  FROM dim_technician_role_scd2 dtr
+  JOIN dim_timeday td 
+    ON td.date BETWEEN dtr.effective_from AND dtr.effective_to
 )
-INSERT INTO ft_name2 (id, day_id, sk_parameter, sk_technician_role)
-SELECT rn, day_id, sk_parameter, sk_technician_role
-FROM seeds
-ORDER BY rn
-LIMIT 5;
 
--- 3) Refresh stats (optional but recommended)
-ANALYZE ft_name2;
-
-
-
+INSERT INTO ft_service (
+    day_id,
+    sk_device_geo,
+    sk_servicetype,
+    sk_technician_role,
+    service_cost_eur,
+    duration_minutes,
+    service_quality_score,
+    underqualified_flag,
+    etl_load_timestamp
+)
+SELECT
+  TO_CHAR(s.service_date, 'YYYYMMDD')::INT AS day_id,
+  dd.sk_device_geo,
+  dst.sk_servicetype,
+  rl.sk_technician_role,
+  s.service_cost_eur,
+  s.duration_minutes,
+  s.service_quality_score,
+  CASE 
+      WHEN dtr.role_level < dst.min_required_level THEN TRUE 
+      ELSE FALSE 
+  END AS underqualified_flag,
+  CURRENT_TIMESTAMP
+FROM svc s
+JOIN dim_device_geo dd 
+     ON dd.device_id = s.device_id
+JOIN dim_servicetype dst 
+     ON dst.tb_servicetype_id = s.servicetypeid
+JOIN role_lookup rl 
+     ON rl.employee_id = s.employeeid 
+    AND rl.date = s.service_date
+JOIN dim_technician_role_scd2 dtr 
+     ON dtr.sk_technician_role = rl.sk_technician_role
+ORDER BY day_id;
