@@ -1,7 +1,7 @@
 SET search_path TO dwh_020, stg_020;
 
 -- =======================================
--- Load dim_timeday
+-- Load dim_timeday (auto-extended version)
 -- =======================================
 
 TRUNCATE TABLE dim_timeday RESTART IDENTITY CASCADE;
@@ -15,10 +15,14 @@ WITH bounds AS (
             (SELECT MIN(start_date)  FROM tb_campaign)
         ) AS min_date,
         GREATEST(
-            (SELECT MAX(readat)      FROM tb_readingevent),
-            (SELECT MAX(servicedat)  FROM tb_serviceevent),
-            (SELECT MAX(observedat)  FROM tb_weather),
-            (SELECT MAX(COALESCE(end_date, CURRENT_DATE)) FROM tb_campaign)
+            -- ensure we cover all real data + a buffer year ahead
+            GREATEST(
+                (SELECT MAX(readat)      FROM tb_readingevent),
+                (SELECT MAX(servicedat)  FROM tb_serviceevent),
+                (SELECT MAX(observedat)  FROM tb_weather),
+                (SELECT MAX(COALESCE(end_date, CURRENT_DATE)) FROM tb_campaign)
+            ),
+            CURRENT_DATE + INTERVAL '365 day'
         ) AS max_date
 )
 INSERT INTO dim_timeday (
