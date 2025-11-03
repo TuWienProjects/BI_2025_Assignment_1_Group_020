@@ -1,32 +1,30 @@
--- Make A1 dwh_xxx, stg_xxx schemas the default for this session
-SET search_path TO dwh_xxx, stg_xxx;
+SET search_path TO dwh_020, stg_020;
 
--- =======================================
--- Load [dim_technician_role_scd2]
--- =======================================
-
--- Step 1: Truncate target table
 TRUNCATE TABLE dim_technician_role_scd2 RESTART IDENTITY CASCADE;
 
--- Step 2: materialize role history rows as SCD2 versions
-WITH role_history AS 
-(
-  SELECT e.badgenumber
-    , r.rolelevel
-    , r.category AS category
-    , r.rolename
-    , e.validfrom AS effective_from
-    , COALESCE(e.validto, DATE '9999-12-31') AS effective_to
-    , (e.validto IS NULL) AS is_current
-  FROM tb_employee e
-  INNER JOIN tb_role r ON r.id = e.roleid
+-- Staging has “current” roles encoded as validfrom/validto
+-- We turn them into SCD2 rows, 1:1 with staging
+
+INSERT INTO dim_technician_role_scd2 (
+    employee_id,
+    badge_number,
+    role_name,
+    role_level,
+    effective_from,
+    effective_to,
+    is_current,
+    etl_load_timestamp
 )
-INSERT INTO dim_technician_role_scd2 (badgenumber, rolelevel, category, rolename, effective_from, effective_to, is_current)
-SELECT badgenumber, rolelevel, category, rolename, effective_from, effective_to, is_current
-FROM role_history
-ORDER BY badgenumber, effective_from;
-
-
-
-
-
+SELECT
+    e.id                  AS employee_id,
+    e.badgenumber         AS badge_number,
+    r.rolename            AS role_name,
+    r.rolelevel           AS role_level,
+    e.validfrom           AS effective_from,
+    COALESCE(e.validto, DATE '9999-12-31') AS effective_to,
+    (e.validto IS NULL OR e.validto >= CURRENT_DATE) AS is_current,
+    CURRENT_TIMESTAMP
+FROM tb_employee e
+JOIN tb_role r
+  ON e.roleid = r.id
+ORDER BY e.id, e.validfrom;

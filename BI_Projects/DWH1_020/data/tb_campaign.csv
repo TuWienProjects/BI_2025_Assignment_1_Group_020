@@ -1,0 +1,7 @@
+id,campaign_name,objective,sponsor,start_date,end_date
+1,Winter Baseline 2023,Establish baseline PM and CO levels for winter season,EU GreenFund,2023-01-01,2023-02-15
+2,Urban Renewal Pilot,Test low-emission zones impact on AQ,CityGov Vienna,2023-01-15,2023-03-15
+3,School-Zone AQ Study,Measure exposure around schools,UNICEF Austria,2023-02-01,2023-04-01
+4,Industrial Emission Review,Compare readings near factories,EnviroTech Group,2023-02-15,2023-04-15
+5,Traffic Reduction Test,Correlate traffic drop with NO2 levels,Federal Transport Dept,2023-03-01,2023-04-30
+6,Spring Calibration,Re-calibrate sensor network after winter,AirQ Agency,2023-04-01,2023-04-30
