@@ -102,7 +102,7 @@
       ],
       "dct:title": "a1_etl01_dim_timeday.sql",
       "dct:format": "text/sql",
-      "contentHash": "ae6aa177f7f443f30918d385633c6a2a3df396684589b4b54f0250241b1e65e0"
+      "contentHash": "68e6fe1b1e68afba572548e8a1c66ea3c75131b414b8600756a133b1d806c68f"
     },
     {
       "@id": "file:etl/a1_etl02_dim_servicetype.sql",
@@ -224,7 +224,7 @@
       "@id": "db://airq/dwh_020/dim_timeday",
       "@type": "prov:Entity",
       "dct:title": "dim_timeday",
-      "rowCount": 731
+      "rowCount": 1404
     },
     {
       "@id": "db://airq/dwh_020/ft_reading",
@@ -280,11 +280,11 @@
       ]
     },
     {
-      "@id": "urn:airq:etl:group:020:2025-11-03T17:50:25Z",
+      "@id": "urn:airq:etl:group:020:2025-11-04T15:20:15Z",
       "@type": "prov:Activity",
       "dct:description": "Assignment 1 ETL run for dwh_020",
-      "prov:startedAtTime": "2025-11-03T17:50:25Z",
-      "prov:endedAtTime": "2025-11-03T17:50:25Z",
+      "prov:startedAtTime": "2025-11-04T15:20:15Z",
+      "prov:endedAtTime": "2025-11-04T15:20:15Z",
       "prov:used": [
         "oltp://tb_campaign",
         "oltp://tb_campaign_device",

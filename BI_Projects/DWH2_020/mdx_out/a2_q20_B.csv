@@ -1,0 +1,91 @@
+purpose,category,alert_level_name,Exceed Days (any)
+Comfort,Gas,None,0
+Comfort,Volatile Organic Compound,None,0
+Environmental Monitoring,Gas,None,0
+Environmental Monitoring,Particulate matter,None,0
+Environmental Monitoring,Volatile Organic Compound,None,0
+Health Risk,Biological,None,0
+Health Risk,Gas,None,0
+Health Risk,Heavy Metal,None,0
+Health Risk,Particulate matter,None,0
+Health Risk,Volatile Organic Compound,None,0
+Regulatory Compliance,Gas,None,0
+Regulatory Compliance,Heavy Metal,None,0
+Regulatory Compliance,Particulate matter,None,0
+Regulatory Compliance,Volatile Organic Compound,None,0
+Scientific Study,Biological,None,0
+Scientific Study,Heavy Metal,None,0
+Scientific Study,Particulate matter,None,0
+Scientific Study,Volatile Organic Compound,None,0
+Comfort,Gas,Yellow,315
+Comfort,Volatile Organic Compound,Yellow,280
+Environmental Monitoring,Gas,Yellow,208
+Environmental Monitoring,Particulate matter,Yellow,272
+Environmental Monitoring,Volatile Organic Compound,Yellow,328
+Health Risk,Biological,Yellow,702
+Health Risk,Gas,Yellow,867
+Health Risk,Heavy Metal,Yellow,1216
+Health Risk,Particulate matter,Yellow,830
+Health Risk,Volatile Organic Compound,Yellow,489
+Regulatory Compliance,Gas,Yellow,323
+Regulatory Compliance,Heavy Metal,Yellow,317
+Regulatory Compliance,Particulate matter,Yellow,326
+Regulatory Compliance,Volatile Organic Compound,Yellow,272
+Scientific Study,Biological,Yellow,858
+Scientific Study,Heavy Metal,Yellow,355
+Scientific Study,Particulate matter,Yellow,332
+Scientific Study,Volatile Organic Compound,Yellow,297
+Comfort,Gas,Orange,534
+Comfort,Volatile Organic Compound,Orange,429
+Environmental Monitoring,Gas,Orange,589
+Environmental Monitoring,Particulate matter,Orange,748
+Environmental Monitoring,Volatile Organic Compound,Orange,623
+Health Risk,Biological,Orange,2110
+Health Risk,Gas,Orange,1676
+Health Risk,Heavy Metal,Orange,2068
+Health Risk,Particulate matter,Orange,1908
+Health Risk,Volatile Organic Compound,Orange,1601
+Regulatory Compliance,Gas,Orange,683
+Regulatory Compliance,Heavy Metal,Orange,745
+Regulatory Compliance,Particulate matter,Orange,648
+Regulatory Compliance,Volatile Organic Compound,Orange,638
+Scientific Study,Biological,Orange,1960
+Scientific Study,Heavy Metal,Orange,734
+Scientific Study,Particulate matter,Orange,555
+Scientific Study,Volatile Organic Compound,Orange,318
+Comfort,Gas,Red,975
+Comfort,Volatile Organic Compound,Red,716
+Environmental Monitoring,Gas,Red,1313
+Environmental Monitoring,Particulate matter,Red,1016
+Environmental Monitoring,Volatile Organic Compound,Red,655
+Health Risk,Biological,Red,4395
+Health Risk,Gas,Red,2922
+Health Risk,Heavy Metal,Red,3538
+Health Risk,Particulate matter,Red,2910
+Health Risk,Volatile Organic Compound,Red,2955
+Regulatory Compliance,Gas,Red,1239
+Regulatory Compliance,Heavy Metal,Red,993
+Regulatory Compliance,Particulate matter,Red,992
+Regulatory Compliance,Volatile Organic Compound,Red,754
+Scientific Study,Biological,Red,2942
+Scientific Study,Heavy Metal,Red,1044
+Scientific Study,Particulate matter,Red,938
+Scientific Study,Volatile Organic Compound,Red,505
+Comfort,Gas,Crimson,700
+Comfort,Volatile Organic Compound,Crimson,657
+Environmental Monitoring,Gas,Crimson,1458
+Environmental Monitoring,Particulate matter,Crimson,1255
+Environmental Monitoring,Volatile Organic Compound,Crimson,1055
+Health Risk,Biological,Crimson,4942
+Health Risk,Gas,Crimson,3338
+Health Risk,Heavy Metal,Crimson,3718
+Health Risk,Particulate matter,Crimson,3676
+Health Risk,Volatile Organic Compound,Crimson,3233
+Regulatory Compliance,Gas,Crimson,1416
+Regulatory Compliance,Heavy Metal,Crimson,1312
+Regulatory Compliance,Particulate matter,Crimson,963
+Regulatory Compliance,Volatile Organic Compound,Crimson,911
+Scientific Study,Biological,Crimson,2948
+Scientific Study,Heavy Metal,Crimson,1455
+Scientific Study,Particulate matter,Crimson,961
+Scientific Study,Volatile Organic Compound,Crimson,570

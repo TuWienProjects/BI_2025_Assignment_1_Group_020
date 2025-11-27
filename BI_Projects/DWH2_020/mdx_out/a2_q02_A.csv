@@ -1,0 +1,10 @@
+year_num,quarter_num,month_name,region_name,country_name,city_name,Missing Days
+2023,1,Jan,Central Europe,Austria,Graz,11
+2023,1,Feb,Central Europe,Austria,Graz,4
+2023,1,Mar,Central Europe,Austria,Graz,2
+2023,1,Jan,Central Europe,Austria,Salzburg,3
+2023,1,Feb,Central Europe,Austria,Salzburg,5
+2023,1,Mar,Central Europe,Austria,Salzburg,4
+2023,1,Jan,Central Europe,Austria,Vienna,6
+2023,1,Feb,Central Europe,Austria,Vienna,2
+2023,1,Mar,Central Europe,Austria,Vienna,2

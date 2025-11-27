@@ -1,0 +1,16 @@
+region_name,purpose,Data Volume (KB)
+Central Europe,Comfort,372834
+Eastern Europe,Comfort,425427
+Western Europe,Comfort,426022
+Central Europe,Environmental Monitoring,700437
+Eastern Europe,Environmental Monitoring,1113626
+Western Europe,Environmental Monitoring,985945
+Central Europe,Health Risk,3931810
+Eastern Europe,Health Risk,5588149
+Western Europe,Health Risk,5117287
+Central Europe,Regulatory Compliance,1004339
+Eastern Europe,Regulatory Compliance,1356584
+Western Europe,Regulatory Compliance,1267687
+Central Europe,Scientific Study,1158338
+Eastern Europe,Scientific Study,1921332
+Western Europe,Scientific Study,1740013

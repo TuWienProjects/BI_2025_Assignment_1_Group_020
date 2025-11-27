@@ -1,0 +1,26 @@
+-- Business Question Q2 - MDX for Student A
+-- For parameter O3, show Missing Days in Austria by City x Month for Q1 of 2023.
+-- Return Austrian Cities on rows and the first three months of 2023 (Jan-Mar) on columns.
+
+SELECT
+  NON EMPTY
+    CROSSJOIN(
+      { [Measures].[Missing Days] },
+      FILTER(
+        Descendants(
+          [dim_timemonth].[Time].[year_num].&[2023],
+          [dim_timemonth].[Time].[month_name]
+        ),
+        [dim_timemonth].[Time].CurrentMember.Parent.Name = "1"
+      )
+    ) ON COLUMNS,
+  NON EMPTY 
+    FILTER(
+      [dim_city].[Geo].[city_name].Members,
+      ANCESTOR(
+        [dim_city].[Geo].CurrentMember,
+        [dim_city].[Geo].[country_name]
+      ).Name = "Austria"
+    ) ON ROWS
+FROM [AirQ Cube]
+WHERE [dim_param].[Param].[param_name].&[O3]

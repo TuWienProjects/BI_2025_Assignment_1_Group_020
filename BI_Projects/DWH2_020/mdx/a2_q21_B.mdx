@@ -1,0 +1,23 @@
+-- **Business Question Q21** — MDX for Student B (NEW)
+-- For Eastern Europe in 2024, show P95 Recorded Value by City × Quarter for PM10 parameter.
+-- Return Cities on rows and four quarters (Q1–Q4) on columns, filtered to Eastern Europe and PM10.
+
+SELECT
+  NON EMPTY
+    CROSSJOIN(
+      { [Measures].[P95 Recorded Value] },
+      Descendants(
+        [dim_timemonth].[Time].[year_num].&[2024],
+        [dim_timemonth].[Time].[quarter_num]
+      )
+    ) ON COLUMNS,
+  NON EMPTY
+    FILTER(
+      [dim_city].[Geo].[city_name].Members,
+      ANCESTOR(
+        [dim_city].[Geo].CurrentMember,
+        [dim_city].[Geo].[region_name]
+      ).Name = "Eastern Europe"
+    ) ON ROWS
+FROM [AirQ Cube]
+WHERE [dim_param].[Param].[param_name].&[PM10]

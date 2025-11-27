@@ -1,0 +1,15 @@
+-- Business Question Q3 - MDX for Student A (NEW)
+-- For 2024, show Reading Events by Region x Quarter.
+-- Return Regions on rows and the four quarters of 2024 (Q1-Q4) on columns.
+
+SELECT
+  NON EMPTY
+    CROSSJOIN(
+      { [Measures].[Reading Events] },
+      Descendants(
+        [dim_timemonth].[Time].[year_num].&[2024],
+        [dim_timemonth].[Time].[quarter_num]
+      )
+    ) ON COLUMNS,
+  NON EMPTY [dim_city].[Geo].[region_name].Members ON ROWS
+FROM [AirQ Cube]

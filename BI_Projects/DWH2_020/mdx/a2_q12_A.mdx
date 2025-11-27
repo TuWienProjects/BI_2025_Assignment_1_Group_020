@@ -1,0 +1,13 @@
+-- Business Question Q12 - MDX for Student A (NEW)
+-- For 2023, show Data Volume (KB) by Param Purpose x Region.
+-- Return Param Purposes on rows and Regions on columns.
+
+SELECT
+  NON EMPTY
+    CROSSJOIN(
+      { [Measures].[Data Volume (KB)] },
+      [dim_city].[Geo].[region_name].Members
+    ) ON COLUMNS,
+  NON EMPTY [dim_param].[Param].[purpose].Members ON ROWS
+FROM [AirQ Cube]
+WHERE [dim_timemonth].[Time].[year_num].&[2023]

@@ -1,0 +1,182 @@
+-- Assignment 2 ETL: ft_param_city_month
+-- GRAIN: month_key × city_key × param_key
+
+-- EXAMPLE SHAPE (sketch only):
+-- TRUNCATE TABLE ft_param_city_month;
+-- WITH cte1 AS (...),
+--      cte2 AS (...),
+--      cte3 AS (...),
+--      ... AS (...),
+--      final_cte AS (...)
+-- INSERT INTO ft_param_city_month (...columns...)
+-- SELECT ... FROM final_cte;
+
+-- Make A2 dwh2_xxx, stg2_xxx schemas the default for this session
+SET search_path TO dwh2_020, stg2_020;
+
+-- =======================================
+-- Load ft_param_city_month
+-- =======================================
+
+-- Step 1: Truncate target table - ft_param_city_month
+TRUNCATE TABLE ft_param_city_month RESTART IDENTITY CASCADE;
+
+
+
+-- -----------------------------------------
+-- 1. Base readings with Month × City × Param
+-- -----------------------------------------
+WITH base AS (
+    SELECT
+        -- Month key: YYYYMM
+        (EXTRACT(YEAR FROM re.readat)::int * 100
+         + EXTRACT(MONTH FROM re.readat)::int) AS month_key,
+
+        dp.param_key,
+        dc.city_key,
+
+        re.sensordevid AS device_id,
+        re.recordedvalue,
+        re.datavolumekb,
+        re.dataquality,
+        re.readat::date AS day
+    FROM tb_readingevent re
+    JOIN tb_sensordevice sd ON sd.id = re.sensordevid
+    JOIN tb_city sc         ON sc.id = sd.cityid
+    JOIN tb_country co      ON co.id = sc.countryid
+    JOIN dim_city dc        ON dc.city_name = sc.cityname
+                           AND dc.country_name = co.countryname
+    JOIN dim_param dp       ON dp.param_key = re.paramid
+),
+
+
+-- -----------------------------------------
+-- 3. Threshold pivot (Yellow/Orange/Red/Crimson)
+-- -----------------------------------------
+thresholds AS (
+    SELECT 
+        pa.paramid,
+        MAX(CASE WHEN pa.alertid = 1 THEN pa.threshold END) AS thr_yellow,
+        MAX(CASE WHEN pa.alertid = 2 THEN pa.threshold END) AS thr_orange,
+        MAX(CASE WHEN pa.alertid = 3 THEN pa.threshold END) AS thr_red,
+        MAX(CASE WHEN pa.alertid = 4 THEN pa.threshold END) AS thr_crimson
+    FROM tb_paramalert pa
+    GROUP BY pa.paramid
+),
+
+
+-- -----------------------------------------
+-- 4. Daily rank (0..4)
+-- -----------------------------------------
+daily_rank AS (
+    SELECT
+        b.month_key,
+        b.city_key,
+        b.param_key,
+        b.day,
+        MAX(
+            CASE
+                WHEN b.recordedvalue >= th.thr_crimson THEN 4
+                WHEN b.recordedvalue >= th.thr_red     THEN 3
+                WHEN b.recordedvalue >= th.thr_orange  THEN 2
+                WHEN b.recordedvalue >= th.thr_yellow  THEN 1
+                ELSE 0
+            END
+        ) AS daily_rank
+    FROM base b
+    JOIN thresholds th ON th.paramid = b.param_key
+    GROUP BY b.month_key, b.city_key, b.param_key, b.day
+),
+
+
+-- -----------------------------------------
+-- 5. Monthly peak (max daily rank)
+-- -----------------------------------------
+monthly_peak AS (
+    SELECT
+        month_key,
+        city_key,
+        param_key,
+        MAX(daily_rank) AS peak_rank
+    FROM daily_rank
+    GROUP BY month_key, city_key, param_key
+),
+
+
+-- -----------------------------------------
+-- 6. Aggregate monthly measures
+-- -----------------------------------------
+agg AS (
+    SELECT
+        month_key,
+        city_key,
+        param_key,
+
+        COUNT(DISTINCT (device_id::text || '|' || day::text)) AS reading_events_count,
+        COUNT(DISTINCT device_id) AS devices_reporting_count,
+        SUM(datavolumekb) AS data_volume_kb_sum,
+        AVG(recordedvalue) AS recordedvalue_avg,
+        PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY recordedvalue) AS recordedvalue_p95,
+        AVG(dataquality) AS data_quality_avg,
+        COUNT(DISTINCT day) AS days_with_readings
+    FROM base
+    GROUP BY month_key, city_key, param_key
+),
+
+
+-- -----------------------------------------
+-- 7. Exceed days (daily rank ≥ 1)
+-- -----------------------------------------
+exceed AS (
+    SELECT
+        month_key,
+        city_key,
+        param_key,
+        COUNT(*) FILTER (WHERE daily_rank >= 1) AS exceed_days_any
+    FROM daily_rank
+    GROUP BY month_key, city_key, param_key
+)
+
+
+-- -----------------------------------------
+-- 8. Final insert with sequence-generated ft_pcm_key
+-- -----------------------------------------
+INSERT INTO ft_param_city_month (
+    -- Use the sequence to generate the ft_pcm_key
+    ft_pcm_key,
+    month_key,
+    city_key,
+    param_key,
+    alertpeak_key,
+    reading_events_count,
+    devices_reporting_count,
+    data_volume_kb_sum,
+    exceed_days_any,
+    missing_days,
+    recordedvalue_avg,
+    recordedvalue_p95,
+    data_quality_avg
+)
+SELECT
+    nextval('ft_pcm_key_seq'), -- use the sequence to generate the key
+    a.month_key,
+    a.city_key,
+    a.param_key,
+    (mp.peak_rank + 1000) AS alertpeak_key,
+    a.reading_events_count,
+    a.devices_reporting_count,
+    a.data_volume_kb_sum,
+    COALESCE(e.exceed_days_any, 0),
+    (tm.days_in_month - a.days_with_readings) AS missing_days,
+    a.recordedvalue_avg,
+    a.recordedvalue_p95,
+    a.data_quality_avg
+FROM agg a
+JOIN monthly_peak mp ON mp.month_key = a.month_key
+                    AND mp.city_key = a.city_key
+                    AND mp.param_key = a.param_key
+JOIN dim_timemonth tm ON tm.month_key = a.month_key
+LEFT JOIN exceed e ON e.month_key = a.month_key
+                  AND e.city_key = a.city_key
+                  AND e.param_key = a.param_key
+ORDER BY a.month_key, a.city_key, a.param_key;

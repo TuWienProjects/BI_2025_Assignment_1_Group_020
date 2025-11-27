@@ -1,0 +1,13 @@
+-- Business Question Q20 - MDX for Student B (NEW)
+-- For 2024, show Exceed Days (any) by Alert Level x Param Category.
+-- Return Alert Levels on rows and Param Categories on columns.
+
+SELECT
+  NON EMPTY
+    CROSSJOIN(
+      { [Measures].[Exceed Days (any)] },
+      [dim_param].[Param].[category].Members
+    ) ON COLUMNS,
+  [dim_alertpeak].[Alert].[alert_level_name].Members ON ROWS
+FROM [AirQ Cube]
+WHERE [dim_timemonth].[Time].[year_num].&[2024]
