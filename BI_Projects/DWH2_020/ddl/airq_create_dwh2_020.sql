@@ -72,7 +72,7 @@ CREATE TABLE dim_alertpeak (
 -- 4) CREATE TABLE statements for the FACT
 -- =========================
 CREATE TABLE ft_param_city_month (
-	ft_pcm_key  INT NOT NULL PRIMARY KEY -- simple surrogate PK for the fact
+	ft_pcm_key  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY -- surrogate PK auto-generated
 	-- Foreign keys to dimensions
     , month_key           INT     NOT NULL
     , city_key            BIGINT  NOT NULL
